@@ -7,7 +7,6 @@
     body { font-family: sans-serif; padding: 20px; }
     #thanksMessage { display: none; font-weight: bold; color: green; }
   </style>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
   <h1>拼写任务</h1>
@@ -21,7 +20,10 @@
     <p>题目 <span id="questionNumber">1</span> / 20</p>
   </div>
 
-  <p id="thanksMessage">谢谢！您已完成所有题目。</p>
+  <div id="thanksMessage">
+    <p>谢谢！您已完成所有题目。</p>
+    <button id="returnButton">返回表单</button>
+  </div>
 
   <!-- Firebase SDK -->
   <script type="module">
@@ -74,6 +76,7 @@
     const thanksMessage = document.getElementById("thanksMessage");
     const questionNumber = document.getElementById("questionNumber");
     const taskArea = document.getElementById("taskArea");
+    const returnButton = document.getElementById("returnButton");
 
     function showSentence(index) {
       sentenceDisplay.textContent = `请改写： "${sentences[index]}"`;
@@ -108,16 +111,13 @@
         showSentence(currentIndex);
         timer.textContent = "";
       } else {
-        //taskArea.style.display = "none";
-        //thanksMessage.style.display = "block";
         taskArea.style.display = "none";
         thanksMessage.style.display = "block";
-
-// ✅ 3秒后跳转到 Google 表单页面
-setTimeout(() => {
-  window.location.href = "https://forms.gle/5h2tddpLuwsuB59z7";
-}, 3000);
       }
+    });
+
+    returnButton.addEventListener("click", () => {
+      window.location.href = "https://forms.gle/eyCqEHW5sBqBxgsL8";
     });
   </script>
 </body>
