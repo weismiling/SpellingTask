@@ -1,43 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>Spelling Task</title>
+  <meta charset="UTF-8">
+  <title>拼写任务</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #taskArea, #thanksMessage { display: none; }
+    #thanksMessage { font-weight: bold; color: green; }
+  </style>
 </head>
 <body>
   <h1>拼写任务</h1>
 
-  <!-- 输入 Prolific ID -->
-  <div id="idForm">
-    <p>Please enter your <strong>Prolific ID</strong>:</p>
-    <input type="text" id="prolificIdInput" required />
+  <div id="idInputArea">
+    <label for="prolificIdInput">Please enter your Prolific ID:</label><br>
+    <input type="text" id="prolificIdInput" required>
     <button id="startTaskBtn">开始任务</button>
   </div>
 
-  <!-- 拼写任务区域 -->
-  <div id="taskArea" style="display:none;">
-    <p id="sentence"></p>
-    <input type="text" id="answerInput" />
-    <button id="submitBtn">提交</button>
+  <div id="taskArea">
+    <p id="sentenceDisplay"></p>
+    <form id="taskForm">
+      <textarea id="correctedText" rows="4" cols="50" required></textarea><br>
+      <button type="submit">提交</button>
+    </form>
+    <p id="timer"></p>
+    <p>题目 <span id="questionNumber">1</span> / 20</p>
   </div>
 
-  <!-- 完成后的感谢信息 -->
-  <div id="thanksMessage" style="display:none;">
+  <div id="thanksMessage">
     <p>谢谢！您已完成所有题目。</p>
     <button id="returnButton">返回表单</button>
   </div>
 
   <!-- Firebase SDK -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-    import { getFirestore, doc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+    import { getFirestore, collection, doc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
-    // ✅ Firebase 配置
     const firebaseConfig = {
       apiKey: "AIzaSyA4eqoXelo_GDAB6StRH7iU5HBvlnjqmsc",
       authDomain: "spellingtask.firebaseapp.com",
       projectId: "spellingtask",
-      storageBucket: "spellingtask.appspot.com",
+      storageBucket: "spellingtask.firebasestorage.app",
       messagingSenderId: "754744794519",
       appId: "1:754744794519:web:57ff06a0114920a9ae78d2",
       measurementId: "G-TKTLNMDVZJ"
@@ -46,104 +51,102 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // ✅ DOM 元素
-    const idForm = document.getElementById("idForm");
-    const startTaskBtn = document.getElementById("startTaskBtn");
-    const prolificIdInput = document.getElementById("prolificIdInput");
-
-    const taskArea = document.getElementById("taskArea");
-    const sentenceP = document.getElementById("sentence");
-    const answerInput = document.getElementById("answerInput");
-    const submitBtn = document.getElementById("submitBtn");
-
-    const thanksMessage = document.getElementById("thanksMessage");
-    const returnButton = document.getElementById("returnButton");
-
-    // ✅ 任务数据
     const sentences = [
-      "I can has cheezburger.",
-      "She dont know the answer.",
-      "Their going to the park.",
-      "Its a nice day.",
-      "He have two dogs.",
-      "The cat sleep on the couch.",
-      "I has no idea.",
-      "We was there yesterday.",
-      "He dont like it.",
-      "Its raining outside.",
-      "They is my friends.",
-      "I loves chocolate.",
-      "She have a new car.",
-      "He run fast.",
-      "I are happy.",
-      "This are mine.",
-      "It dont matter.",
-      "We was happy.",
-      "He have a idea.",
-      "I is ready."
+      "I recieved teh invitaton yestarday.",
+      "She dont has enogh experince for the job.",
+      "We was planing to go on vaccation next week.",
+      "The childs was plaing in the gardan.",
+      "I haved too much coffee this morning.",
+      "He writed the report last night.",
+      "There is many reason why it failled.",
+      "They has went to the wrong adress.",
+      "This is the most bueatiful place I seen.",
+      "I hope you enjoi your stay hear.",
+      "He don’t know where the libary is.",
+      "Their going to the zoo tomorrow.",
+      "It’s cold so ware a jacket.",
+      "The test was realy difficlt.",
+      "I will meat you at the resturant.",
+      "We have alot of work too do.",
+      "I losted my phone at the park.",
+      "Your the best freind I ever had.",
+      "She has many knoledg about art.",
+      "My favorit color is bleau."
     ];
 
     let currentIndex = 0;
-    let startTime;
+    let startTime = Date.now();
     let prolificId = "";
 
-    // ✅ 填写 ID 开始任务
+    const sentenceDisplay = document.getElementById("sentenceDisplay");
+    const form = document.getElementById("taskForm");
+    const correctedText = document.getElementById("correctedText");
+    const timer = document.getElementById("timer");
+    const thanksMessage = document.getElementById("thanksMessage");
+    const questionNumber = document.getElementById("questionNumber");
+    const taskArea = document.getElementById("taskArea");
+    const returnButton = document.getElementById("returnButton");
+    const startTaskBtn = document.getElementById("startTaskBtn");
+    const prolificIdInput = document.getElementById("prolificIdInput");
+    const idInputArea = document.getElementById("idInputArea");
+
     startTaskBtn.addEventListener("click", () => {
-      const input = prolificIdInput.value.trim();
-      if (!input) {
-        alert("Please enter your Prolific ID.");
+      prolificId = prolificIdInput.value.trim();
+      if (!prolificId) {
+        alert("请输入 Prolific ID");
         return;
       }
-      prolificId = input;
-      idForm.style.display = "none";
+      idInputArea.style.display = "none";
       taskArea.style.display = "block";
       showSentence(currentIndex);
     });
 
-    // ✅ 显示句子
     function showSentence(index) {
-      sentenceP.textContent = sentences[index];
-      answerInput.value = "";
-      answerInput.focus();
+      sentenceDisplay.textContent = `请改写： \"${sentences[index]}\"`;
+      correctedText.value = "";
+      questionNumber.textContent = index + 1;
       startTime = Date.now();
     }
 
-    // ✅ 提交按钮
-    submitBtn.addEventListener("click", async () => {
-      const original = sentences[currentIndex];
-      const answer = answerInput.value.trim();
+    form.addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const answer = correctedText.value.trim();
+
       if (!answer) {
-    alert("请输入您的答案！");
-    return;
-  }
-      const duration = (Date.now() - startTime) / 1000;
+        alert("请输入您的答案！");
+        return;
+      }
+
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      const original = sentences[currentIndex];
 
       try {
         const userDocRef = doc(db, "spellingTask", prolificId);
-        const userResponsesRef = collection(userDocRef, "responses");
-
-        await addDoc(userResponsesRef, {
+        const responsesRef = collection(userDocRef, "responses");
+        await addDoc(responsesRef, {
           originalSentence: original,
           correctedText: answer,
           timeTakenSec: parseFloat(duration),
           timestamp: serverTimestamp()
         });
-      } catch (error) {
-        console.error("Firestore 保存失败:", error);
+      } catch (err) {
+        console.error("提交数据失败:", err);
+        alert("提交失败：" + err.message);
+        return;
       }
 
-      currentIndex++;
-      if (currentIndex < sentences.length) {
+      if (currentIndex < sentences.length - 1) {
+        currentIndex++;
         showSentence(currentIndex);
+        timer.textContent = "";
       } else {
         taskArea.style.display = "none";
         thanksMessage.style.display = "block";
       }
     });
 
-    // ✅ 返回表单按钮（修改你的 Google Form 链接）
     returnButton.addEventListener("click", () => {
-      window.location.href = "https://forms.gle/4ub3jVCZKjYZSGoi8";
+      window.location.href = "https://forms.gle/n8fin968Ff4xFo1r6";
     });
   </script>
 </body>
