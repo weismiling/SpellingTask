@@ -112,6 +112,10 @@
     submitBtn.addEventListener("click", async () => {
       const original = sentences[currentIndex];
       const answer = answerInput.value.trim();
+      if (!answer) {
+    alert("请输入您的答案！");
+    return;
+  }
       const duration = (Date.now() - startTime) / 1000;
 
       try {
