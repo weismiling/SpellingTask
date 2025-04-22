@@ -108,8 +108,15 @@
         showSentence(currentIndex);
         timer.textContent = "";
       } else {
+        //taskArea.style.display = "none";
+        //thanksMessage.style.display = "block";
         taskArea.style.display = "none";
         thanksMessage.style.display = "block";
+
+// ✅ 3秒后跳转到 Google 表单页面
+setTimeout(() => {
+  window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSccGsHsAy3knhB007yAzRTsaS6OFdPCqS9vhnhyR2Kiz7OIQw/viewform?usp=header";
+}, 3000);
       }
     });
   </script>
