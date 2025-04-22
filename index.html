@@ -1,0 +1,70 @@
+   <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Spelling Task</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #thanksMessage { display: none; font-weight: bold; color: green; }
+  </style>
+</head>
+<body>
+  <h1>Spelling Task</h1>
+  <p>Please correct the spelling of this sentence:</p>
+  <p><em>"I recieved teh invitaton yestarday."</em></p>
+
+  <form id="taskForm">
+    <textarea id="correctedText" rows="4" cols="50" required></textarea><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="timer"></p>
+  <p id="thanksMessage">Thank you! Your response has been submitted.</p>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+
+  <script>
+    // 替换这里的配置！！！
+    
+    const firebaseConfig = {
+  apiKey: "AIzaSyA4eqoXelo_GDAB6StRH7iU5HBvlnjqmsc",
+  authDomain: "spellingtask.firebaseapp.com",
+  projectId: "spellingtask",
+  storageBucket: "spellingtask.firebasestorage.app",
+  messagingSenderId: "754744794519",
+  appId: "1:754744794519:web:57ff06a0114920a9ae78d2",
+  measurementId: "G-TKTLNMDVZJ"
+};
+
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // 计时开始
+    const startTime = Date.now();
+
+    // 监听提交
+    document.getElementById("taskForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const corrected = document.getElementById("correctedText").value;
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      try {
+        await db.collection("spellingResponses").add({
+          correctedText: corrected,
+          timeTakenSec: parseFloat(duration),
+          timestamp: new Date()
+        });
+
+        document.getElementById("taskForm").style.display = "none";
+        document.getElementById("thanksMessage").style.display = "block";
+        document.getElementById("timer").textContent = "You took " + duration + " seconds.";
+      } catch (err) {
+        alert("Error saving response: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>
