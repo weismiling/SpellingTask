@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spelling Awareness Task</title>
+  <script type="module">
+    // ✅ Firebase SDK 引入
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // ✅ 替换成你的 Firebase 项目配置
+    const firebaseConfig = {
+  apiKey: "AIzaSyA4eqoXelo_GDAB6StRH7iU5HBvlnjqmsc",
+  authDomain: "spellingtask.firebaseapp.com",
+  projectId: "spellingtask",
+  storageBucket: "spellingtask.firebasestorage.app",
+  messagingSenderId: "754744794519",
+  appId: "1:754744794519:web:57ff06a0114920a9ae78d2",
+  measurementId: "G-TKTLNMDVZJ"
+};
+    // ✅ 初始化 Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ✅ 任务开始时间
+    const startTime = Date.now();
+
+    // ✅ 提交事件处理（等 DOM 加载）
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("taskForm");
+      const textarea = document.getElementById("correctedText");
+      const thanksMessage = document.getElementById("thanksMessage");
+      const timerEl = document.getElementById("timer");
+
+      // ⏱ 更新计时器
+      setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timerEl.textContent = "Time: " + elapsed + " seconds";
+      }, 1000);
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const userInput = textarea.value;
+        const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+        try {
+          await addDoc(collection(db, "spellingResponses"), {
+            correctedText: userInput,
+            timeTakenSec: parseFloat(duration),
+            timestamp: serverTimestamp()
+          });
+
+          form.style.display = "none";
+          thanksMessage.style.display = "block";
+          timerEl.textContent = "Final Time: " + duration + " seconds";
+        } catch (err) {
+          alert("Error saving your response: " + err.message);
+        }
+      });
+    });
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2em;
+      max-width: 700px;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+    }
+    button {
+      margin-top: 1em;
+      padding: 10px 20px;
+    }
+    #timer {
+      color: #444;
+      font-size: 14px;
+      margin-bottom: 1em;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Spelling Awareness Task</h1>
+  <div id="timer">Time: 0 seconds</div>
+
+  <p>Please read the passage below. It contains <strong>8 spelling errors</strong>.  
+  Rewrite the corrected version of the paragraph in the box below.</p>
+
+  <blockquote>
+    Last weekend, I <b>visitted</b> my aunt's house in the <b>cuntryside</b>.  
+    The <b>wether</b> was sunny and warm.  
+    We went for a <b>piknic</b> near the river and saw many <b>beutiful</b> birds.  
+    I <b>realy</b> enjoyed the <b>veiw</b>.  
+    Later, we <b>eated</b> some homemade cookies and drank <b>lemonaid</b>.  
+    It was a memorable day.
+  </blockquote>
+
+  <form id="taskForm">
+    <label for="correctedText">Enter your corrected version:</label><br>
+    <textarea id="correctedText" required></textarea><br>
+    <button type="submit">Submit</button>
+  </form>
+
+  <p id="thanksMessage" style="display:none; color: green; font-weight: bold;">Thanks! Your response has been recorded.</p>
+
+</body>
+</html>
