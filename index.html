@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>拼写任务</title>
+  <title>Error Detection Task</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     #taskArea, #thanksMessage { display: none; }
@@ -10,27 +10,27 @@
   </style>
 </head>
 <body>
-  <h1>拼写任务</h1>
+  <h1>Error Detection Task</h1>
 
   <div id="idInputArea">
     <label for="prolificIdInput">Please enter your Prolific ID:</label><br>
     <input type="text" id="prolificIdInput" required>
-    <button id="startTaskBtn">开始任务</button>
-  </div>
+<button id="startTaskBtn">Start Task</button>
+</div>
 
-  <div id="taskArea">
-    <p id="sentenceDisplay"></p>
-    <form id="taskForm">
-      <textarea id="correctedText" rows="4" cols="50" required></textarea><br>
-      <button type="submit">提交</button>
-    </form>
-    <p id="timer"></p>
-    <p>题目 <span id="questionNumber">1</span> / 20</p>
+<div id="taskArea">
+  <p id="sentenceDisplay"></p>
+  <form id="taskForm">
+    <textarea id="correctedText" rows="4" cols="50" required></textarea><br>
+    <button type="submit">Submit</button>
+  </form>
+  <p id="timer"></p>
+  <p>Question <span id="questionNumber">1</span> / 20</p>
   </div>
 
   <div id="thanksMessage">
-    <p>谢谢！您已完成所有题目。</p>
-    <button id="returnButton">返回表单</button>
+    <p>Thank you! You have completed all the questions.</p>
+    <button id="returnButton">Return to GoogleForm</button>
   </div>
 
   <!-- Firebase SDK -->
@@ -93,7 +93,7 @@
     startTaskBtn.addEventListener("click", () => {
       prolificId = prolificIdInput.value.trim();
       if (!prolificId) {
-        alert("请输入 Prolific ID");
+        alert("Please enter your Prolific ID");
         return;
       }
       idInputArea.style.display = "none";
@@ -102,7 +102,7 @@
     });
 
     function showSentence(index) {
-      sentenceDisplay.textContent = `请改写： \"${sentences[index]}\"`;
+      sentenceDisplay.textContent = `Please rewrite： \"${sentences[index]}\"`;
       correctedText.value = "";
       questionNumber.textContent = index + 1;
       startTime = Date.now();
@@ -113,7 +113,7 @@
       const answer = correctedText.value.trim();
 
       if (!answer) {
-        alert("请输入您的答案！");
+        alert("Please enter your answer!");
         return;
       }
 
@@ -130,8 +130,8 @@
           timestamp: serverTimestamp()
         });
       } catch (err) {
-        console.error("提交数据失败:", err);
-        alert("提交失败：" + err.message);
+        console.error("Failed to submit data:", err);
+        alert("Submission failed:" + err.message);
         return;
       }
 
